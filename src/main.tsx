@@ -8,16 +8,12 @@ import Login from "./components/Login";
 
 const router = createBrowserRouter([
   {
-    path: "groups",
+    path: "/",
     element: <App />,
   },
   {
     path: "details",
     element: <GroupDetail />,
-  },
-  {
-    path: "/",
-    element: <Login />,
   },
 ]);
 

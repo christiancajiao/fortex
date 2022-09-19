@@ -1,7 +1,16 @@
-import { Card, Text, Button, Group, Center, Title, Input } from "@mantine/core";
+import {
+  Card,
+  Text,
+  Button,
+  Group,
+  Center,
+  Title,
+  Input,
+  Alert,
+} from "@mantine/core";
 import { useEffect, useState } from "react";
 
-export default function Login() {
+export default function Login(props: any) {
   const url = "https://demo-api-work-test.herokuapp.com/login";
   const data1 = {
     email: "front-test-431@fortexdesign.com",
@@ -10,26 +19,41 @@ export default function Login() {
 
   const [autorization, setAutorization] = useState(null);
   const [data, setData] = useState({ email: "", password: "" });
+  const [handleError, setHandleError] = useState("");
 
   useEffect(() => {
     console.log(data);
-    console.log(autorization);
-  }, [data]);
+  }, [data, autorization]);
 
-  const apiCall = () => {
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    })
-      .then((response) => response.json())
-      .then((data) => setAutorization(data));
+  const apiCall = async () => {
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      if (response.status !== 200) {
+        const data = await response.json();
+        setHandleError(data.message);
+      } else {
+        const dataAutorization = await response.json();
+        console.log(dataAutorization);
+        props.getCredentials(dataAutorization);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
     <Center style={{ width: 800, height: 200 }}>
+      {handleError ? (
+        <Alert title="Error!" color="red">
+          {handleError}
+        </Alert>
+      ) : null}
       <Card shadow="sm" p="lg" radius="md" withBorder>
         <Group position="center" mt="md" mb="xs">
           <Title
