@@ -12,6 +12,7 @@ import {
   Input,
   Container,
   ActionIcon,
+  Center,
   Textarea,
 } from "@mantine/core";
 import { IconX } from "@tabler/icons";
@@ -21,9 +22,11 @@ export default function GroupList(props: any) {
   const [groupList, setGroupList] = useState([]);
   const [modalOpened, setModalOpened] = useState(false);
   const [modalEditOpened, setModalEditOpened] = useState(false);
+  const [modalDeletetOpened, setModalDeleteOpened] = useState(false);
   const [roles, setRoles] = useState([]);
   const [people, setPeople] = useState([]);
-  const [listNewPeople, setListNewPeople] = useState();
+  const [newListOfPeople, setNewListOfPeople] = useState();
+  const [oldListOfPeople, setOldListOfPeople] = useState();
   const [newGroup, setNewGroup] = useState({
     name: "",
     description: "",
@@ -35,7 +38,8 @@ export default function GroupList(props: any) {
 
   useEffect(() => {
     setGroupList(props.groups);
-  }, [props.group]);
+    console.log(props.groups, "grupos en el grouplist");
+  }, [props]);
 
   const removeButton = (
     <ActionIcon
@@ -85,7 +89,6 @@ export default function GroupList(props: any) {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data.groups);
         setGroupList(data.groups);
       });
   };
@@ -116,10 +119,11 @@ export default function GroupList(props: any) {
     apiCallGroups();
   };
 
-  const editGroup = async (id: any) => {
+  const editGroup = async (group: any) => {
+    console.log(group);
     try {
       const response = await fetch(
-        `https://demo-api-work-test.herokuapp.com/group/update/?id=${id}`,
+        `https://demo-api-work-test.herokuapp.com/group/update/?group=${group.id}`,
         {
           method: "PATCH",
           headers: {
@@ -144,29 +148,31 @@ export default function GroupList(props: any) {
   };
 
   function idOfOldGroupPeople(group: any) {
-    let justArraysOfPeople = [];
+    //al dar click en edit va a setear un array con las personas que estan en el grupo y va a setear un array con las personas(objetos)
+    let ArraysOfPeople = [];
     for (let i = 0; i < group.length; i++) {
-      justArraysOfPeople.push(group[i].id);
+      ArraysOfPeople.push(group[i].id);
     }
-    return justArraysOfPeople;
+    setOldListOfPeople(ArraysOfPeople);
   }
-  function idOfNewGroupPeople(item: any, index: any) {
-    // let newArr = [...people];
-    // console.log(newArr, item, index);
-    // newArr.splice(index, 1);
-    // console.log("otro log", newArr);
-    // setPeople(newArr);
-    let existingPeople = [];
-    for (let i = 0; i < people.length; i++) {
-      if (people[i].id != item.id) {
-        existingPeople.push(people[i].id);
-        console.log(people[i].id);
+  function idOfNewGroupPeople(group: any, person: any) {
+    let newArrPeople = [];
+    let newArrIdPeople = [];
+    for (let i = 0; i < group.length; i++) {
+      if (group[i] !== person.id) {
+        newArrIdPeople.push(group[i]);
       }
     }
-    setListNewPeople(existingPeople);
+    for (let i = 0; i < people.length; i++) {
+      if (people[i] !== person) {
+        newArrPeople.push(people[i]);
+      }
+    }
+    setNewListOfPeople(newArrIdPeople);
+    setPeople(newArrPeople);
+    //al dar click en delete(boton de cada persona), va a modificar el array de las personas(objetos) y eliminar la persona seleccionada
   }
   const newPeolpleOfGroup = async (group: any) => {
-    console.log(group.people);
     try {
       const response = await fetch(
         "https://demo-api-work-test.herokuapp.com/group/manage-members",
@@ -178,8 +184,8 @@ export default function GroupList(props: any) {
           },
           body: JSON.stringify({
             groupId: group.id,
-            oldValues: idOfOldGroupPeople(group.people),
-            newValues: listNewPeople,
+            oldValues: oldListOfPeople,
+            newValues: newListOfPeople,
           }),
         }
       );
@@ -238,6 +244,10 @@ export default function GroupList(props: any) {
         </Button>
       </Modal>
       <Button
+        className="button-add-group"
+        variant="gradient"
+        gradient={{ from: "teal", to: "lime", deg: 105 }}
+        mt="xl"
         mb="md"
         radius="md"
         size="lg"
@@ -252,10 +262,25 @@ export default function GroupList(props: any) {
           return (
             <Card shadow="sm" p="lg" radius="md" withBorder>
               <Modal
+                opened={modalDeletetOpened}
+                onClose={() => setModalEditOpened(false)}
+                title={" Edit Group "}
+              >
+                <Button
+                  color="red"
+                  onClick={() => {
+                    deleteGroup(group.id);
+                    setModalDeleteOpened(false);
+                  }}
+                >
+                  Yes, i want delete this group
+                </Button>
+              </Modal>
+              <Modal
                 size={800}
                 opened={modalEditOpened}
                 onClose={() => setModalEditOpened(false)}
-                title="Edit Group"
+                title={" Edit Group "}
               >
                 <Input
                   placeholder="Group Name"
@@ -297,6 +322,8 @@ export default function GroupList(props: any) {
                 </Group>
                 <Title mb="md">People</Title>
                 <Button
+                  variant="gradient"
+                  gradient={{ from: "teal", to: "lime", deg: 105 }}
                   size="xs"
                   ml="md"
                   mb="md"
@@ -305,7 +332,7 @@ export default function GroupList(props: any) {
                   Add Person
                 </Button>
                 <Group mb="md">
-                  {group.people.map((person, index) => {
+                  {people.map((person, index) => {
                     return (
                       <Container>
                         {person.active ? (
@@ -316,12 +343,12 @@ export default function GroupList(props: any) {
 
                         {person.name}
                         <Button
+                          color="red"
                           size="xs"
                           ml="md"
                           onClick={() => {
                             //people.splice(index, 1);
-                            idOfNewGroupPeople(person, index);
-                            newPeolpleOfGroup(group);
+                            idOfNewGroupPeople(oldListOfPeople, person);
                           }}
                         >
                           Delete
@@ -331,13 +358,17 @@ export default function GroupList(props: any) {
                   })}
                 </Group>
                 <Button
+                  align="center"
                   mt="md"
                   mb="md"
                   radius="md"
                   size="lg"
                   onClick={() => {
-                    editGroup(group.id);
+                    editGroup(group);
                     setModalEditOpened(false);
+                    if (oldListOfPeople !== newListOfPeople) {
+                      newPeolpleOfGroup(group);
+                    }
                     //enviar las personas o los roles a editar en el post
                   }}
                 >
@@ -353,32 +384,36 @@ export default function GroupList(props: any) {
                     {group.name}
                   </Text>
                 </Title>
-                <Button
-                  color="red"
-                  size="xs"
-                  uppercase
-                  onClick={() => {
-                    deleteGroup(group.id);
-                  }}
-                >
-                  Delete
-                </Button>
-                <Button
-                  color="blue"
-                  size="xs"
-                  uppercase
-                  onClick={() => {
-                    setModalEditOpened(true);
-                    console.log("edit group");
-                    setPeople(group.people);
-                    setRoles(group.roles);
-                  }}
-                >
-                  Edit
-                </Button>
+                <Center>
+                  <Button
+                    color="red"
+                    size="xs"
+                    uppercase
+                    onClick={() => {
+                      setModalDeleteOpened(true);
+                    }}
+                  >
+                    Delete
+                  </Button>
+                  <Button
+                    color="blue"
+                    ml="sm"
+                    size="xs"
+                    uppercase
+                    onClick={() => {
+                      setModalEditOpened(true);
+                      console.log("edit group");
+                      setPeople(group.people);
+                      setRoles(group.roles);
+                      idOfOldGroupPeople(group.people);
+                    }}
+                  >
+                    Edit
+                  </Button>
+                </Center>
               </Group>
 
-              <Text size="xs" lineClamp={3}>
+              <Text size="xs" mb="xl" lineClamp={3}>
                 {group.description}
               </Text>
               <Group>

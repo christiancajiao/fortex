@@ -13,3 +13,8 @@ body {
   flex-direction: column;
   position: relative;
 }
+.button-add-group {
+  position: sticky;
+  top: 70px;
+  z-index: 1;
+}

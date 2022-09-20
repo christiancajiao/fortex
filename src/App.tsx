@@ -9,26 +9,32 @@ import Login from "./components/Login";
 
 export default function App() {
   const urlGroup = "https://demo-api-work-test.herokuapp.com/group/";
-  const token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijg4YTVlMTFiLWRiZDktNDBlZS1hZjA4LTMyYzBjMDBiYmM5ZiIsIm1haWwiOiJmcm9udC10ZXN0LTQzMUBmb3J0ZXhkZXNpZ24uY29tIiwibmFtZSI6IkRldmVsb3BlciIsIm9yZ2FuaXphdGlvbklkIjoiNWFkYTVmODQtOTY5ZC00NWIzLTg1OGMtZDQ5YjBmNDQ5ODA0IiwicGVybWlzc2lvbnMiOltdLCJpYXQiOjE2NjM2MDY5MDksImV4cCI6MTY2NDIxMTcwOX0.EIjpGFnzKirTF1aSYahZ4Cj2Sv9YUq_MJXyhkGkV3OE";
   const [credentials, setCredentials] = useState();
   const [groups, setGroups] = useState([]);
 
   useEffect(() => {
     credentials ? apiCall() : console.log("no existen creedenciales aun");
-    console.log(groups);
+    console.log(groups, "grupos");
   }, [credentials]);
 
   const apiCall = async () => {
-    fetch(urlGroup, {
-      headers: {
-        Authorization: credentials.token,
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setGroups(data.groups);
+    try {
+      const response = await fetch(urlGroup, {
+        method: "GET",
+        headers: {
+          Authorization: credentials?.token,
+        },
       });
+      if (response.status !== 200) {
+        const data = await response.json();
+      } else {
+        const data = await response.json();
+        console.log(data.groups);
+        setGroups(data.groups);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   function getCredentials(credentials: any) {
@@ -46,10 +52,12 @@ export default function App() {
           padding="md"
           header={
             <Header height={60} p="xs">
-              <div>
+              <Text weight={700} align="center">
                 {credentials?.user.name}
-                <span>{credentials?.user.email}</span>
-              </div>
+              </Text>
+              <Text align="center" mb="md">
+                {credentials?.user.email}
+              </Text>
             </Header>
           }
           styles={(theme) => ({
