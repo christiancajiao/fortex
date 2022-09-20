@@ -27,7 +27,7 @@ export default function App() {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data), setGroups(data.groups);
+        setGroups(data.groups);
       });
   };
 
@@ -48,7 +48,6 @@ export default function App() {
             <Header height={60} p="xs">
               <div>
                 {credentials?.user.name}
-                id= {credentials?.user.id}
                 <span>{credentials?.user.email}</span>
               </div>
             </Header>
