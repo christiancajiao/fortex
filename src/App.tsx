@@ -14,7 +14,6 @@ export default function App() {
 
   useEffect(() => {
     credentials ? apiCall() : console.log("no existen creedenciales aun");
-    console.log(groups, "grupos");
   }, [credentials]);
 
   const apiCall = async () => {
@@ -29,7 +28,6 @@ export default function App() {
         const data = await response.json();
       } else {
         const data = await response.json();
-        console.log(data.groups);
         setGroups(data.groups);
       }
     } catch (error) {
@@ -38,12 +36,8 @@ export default function App() {
   };
 
   function getCredentials(credentials: any) {
-    console.log(credentials);
     setCredentials(credentials);
     apiCall();
-  }
-  function logconsole(mensaje: any) {
-    console.log("funciona el callback", mensaje);
   }
   return (
     <MantineProvider withGlobalStyles withNormalizeCSS>
@@ -72,7 +66,7 @@ export default function App() {
           <GroupList groups={groups} credentials={credentials} />
         </AppShell>
       ) : (
-        <Login getCredentials={getCredentials} log={logconsole} />
+        <Login getCredentials={getCredentials} />
       )}
     </MantineProvider>
   );

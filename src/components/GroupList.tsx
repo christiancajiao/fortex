@@ -25,6 +25,7 @@ export default function GroupList(props: any) {
   const [modalDeletetOpened, setModalDeleteOpened] = useState(false);
   const [roles, setRoles] = useState([]);
   const [people, setPeople] = useState([]);
+  const [groupToDelete, setGroupToDelete] = useState();
   const [newListOfPeople, setNewListOfPeople] = useState();
   const [oldListOfPeople, setOldListOfPeople] = useState();
   const [newGroup, setNewGroup] = useState({
@@ -38,7 +39,6 @@ export default function GroupList(props: any) {
 
   useEffect(() => {
     setGroupList(props.groups);
-    console.log(props.groups, "grupos en el grouplist");
   }, [props]);
 
   const removeButton = (
@@ -55,7 +55,6 @@ export default function GroupList(props: any) {
     </ActionIcon>
   );
   const createGroup = async () => {
-    console.log("esta corriendo create group");
     try {
       const response = await fetch(
         "https://demo-api-work-test.herokuapp.com/group/create",
@@ -93,10 +92,11 @@ export default function GroupList(props: any) {
       });
   };
 
-  const deleteGroup = async (id: any) => {
+  const deleteGroup = async (group: any) => {
+    console.log(group.id);
     try {
       const response = await fetch(
-        `https://demo-api-work-test.herokuapp.com/group/delete/?id=${id}`,
+        `https://demo-api-work-test.herokuapp.com/group/delete/?id=${group.id}`,
         {
           method: "DELETE",
           headers: {
@@ -120,10 +120,12 @@ export default function GroupList(props: any) {
   };
 
   const editGroup = async (group: any) => {
-    console.log(group);
+    console.log(
+      `https://demo-api-work-test.herokuapp.com/group/update/?id=${group.id}`
+    );
     try {
       const response = await fetch(
-        `https://demo-api-work-test.herokuapp.com/group/update/?group=${group.id}`,
+        `https://demo-api-work-test.herokuapp.com/group/update/?id=${group.id}`,
         {
           method: "PATCH",
           headers: {
@@ -263,14 +265,14 @@ export default function GroupList(props: any) {
             <Card shadow="sm" p="lg" radius="md" withBorder>
               <Modal
                 opened={modalDeletetOpened}
-                onClose={() => setModalEditOpened(false)}
-                title={" Edit Group "}
+                onClose={() => setModalDeleteOpened(false)}
+                title={"Delete Group"}
               >
                 <Button
                   color="red"
                   onClick={() => {
-                    deleteGroup(group.id);
                     setModalDeleteOpened(false);
+                    deleteGroup(groupToDelete);
                   }}
                 >
                   Yes, i want delete this group
@@ -391,6 +393,8 @@ export default function GroupList(props: any) {
                     uppercase
                     onClick={() => {
                       setModalDeleteOpened(true);
+                      console.log(group);
+                      setGroupToDelete(group);
                     }}
                   >
                     Delete
