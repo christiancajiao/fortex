@@ -5,7 +5,7 @@ App created with Vite an MantineUI
 
 # INSTALL
 
-copy the repositorie and then in command shell run:
+copy the repository  and then in command shell run:
 
 npm install
 
